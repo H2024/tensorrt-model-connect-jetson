@@ -11,7 +11,7 @@ Run **TensorRT 11.1** and **[TensorRT Model Connect][trtmc]** on a Jetson AGX Or
 > **NVIDIA does not support this.** The TensorRT installation guide states plainly that
 > JetPack is not a supported platform for TensorRT 11.x and that *"Jetson deployments must
 > remain on a TensorRT 10.x release supported by their JetPack version."* This recipe works
-> anyway — see [why](#why-this-works-at-all) — but you are off the supported path. Do not
+> anyway - see [why](#why-this-works-at-all) - but you are off the supported path. Do not
 > ship production robotics on it without understanding [what you give up](#known-limitations).
 
 ---
@@ -50,7 +50,7 @@ You get:
 | `Dockerfile` | `ubuntu:24.04` + pip CUDA 13 + TensorRT 11.1 + the TRTMC wheel |
 | `build.sh` | Build wrapper with an image-overwrite guard and a before/after Docker state diff |
 | `run.sh` | Throwaway container with the GPU flags that actually work on JetPack 7 |
-| `docker/verify.sh` | Staged PASS/FAIL smoke test — the honest answer to "does this work here?" |
+| `docker/verify.sh` | Staged PASS/FAIL smoke test - the honest answer to "does this work here?" |
 | `tools/trt_smoke.py` | Builds real fp32/fp16/bf16 engines against the TensorRT 11 API |
 | `tools/trtinfo.py` | Platform, driver, CUDA and TensorRT report; runs on host **and** in container |
 
@@ -61,10 +61,10 @@ Everything is stdlib, ctypes and shell. No PyTorch, no pycuda, no cuda-python re
 | | Status |
 |---|---|
 | **Verified on** | Jetson AGX Orin 64GB · JetPack 7.2 / L4T R39.2.0 · kernel 6.8.12-tegra · Ubuntu 24.04 · CUDA driver 13.2 · SM 8.7 |
-| **Should work** | Jetson Orin NX / Orin Nano on JetPack 7.2 (same SM 8.7, less memory) — untested, [please report](#report-your-results) |
-| **Should work** | Jetson AGX Thor on JetPack 7.x — SBSA native, SM 11.0; set `SM=110` |
+| **Should work** | Jetson Orin NX / Orin Nano on JetPack 7.2 (same SM 8.7, less memory) - untested, [please report](#report-your-results) |
+| **Should work** | Jetson AGX Thor on JetPack 7.x - SBSA native, SM 11.0; set `SM=110` |
 | **Will not work** | JetPack 6.x or earlier. Orin only joined the SBSA CUDA path in JetPack 7.2; before that, the aarch64 wheels have nothing to bind to |
-| **Will not work** | x86_64 — TRTMC publishes aarch64 release wheels only; x86 users must build from source |
+| **Will not work** | x86_64 - TRTMC publishes aarch64 release wheels only; x86 users must build from source |
 
 ## Why this works at all
 
@@ -72,7 +72,7 @@ Three facts have to line up, and as of JetPack 7.2 they finally do.
 
 **1. Orin moved onto SBSA.** Historically Jetson ran a Tegra-specific CUDA stack that
 generic aarch64 wheels could not target. JetPack 7.2 puts Orin on the Server Base System
-Architecture path with CUDA 13.2 — the same target that datacenter ARM wheels are built
+Architecture path with CUDA 13.2 - the same target that datacenter ARM wheels are built
 for. This is the change that makes everything below possible.
 
 **2. The wheels are aarch64 and glibc-compatible.** TRTMC publishes
@@ -81,7 +81,7 @@ glibc 2.39. The match is exact, not approximate.
 
 **3. TensorRT 11 still has SM 8.7 kernels.** The support matrix lists compute capability
 8.7 (Jetson AGX Orin) among supported architectures. NVIDIA's *installation* docs exclude
-JetPack as a platform, but the kernels for Orin's GPU are in the build — which is why
+JetPack as a platform, but the kernels for Orin's GPU are in the build - which is why
 containerising around the platform restriction works.
 
 What NVIDIA is really saying with "not supported" is that they do not test or ship this
@@ -122,7 +122,7 @@ docker info | grep -i -A3 runtimes    # expect an 'nvidia' runtime
 ```
 
 If that comes back empty, fix it before going further. No container flag substitutes for a
-missing runtime, and no bind-mount workaround is a substitute either — see
+missing runtime, and no bind-mount workaround is a substitute either - see
 [pitfall 7](docs/troubleshooting.md#7-never-bind-mount-host-system-libraries).
 
 **3. A terminal multiplexer.** BuildKit **cancels the build when its CLI client
@@ -133,7 +133,7 @@ setsid nohup ./build.sh > build.log 2>&1 &
 tail -f build.log
 ```
 
-**4. About 10 GB free** in `/var/lib/docker` — `df -h /var/lib/docker`, `docker system df`.
+**4. About 10 GB free** in `/var/lib/docker` - `df -h /var/lib/docker`, `docker system df`.
 
 ## Install
 
@@ -143,9 +143,9 @@ tail -f build.log
 
 The build has two deliberate gates, and *where* it stops is diagnostic information:
 
-- **Gate 1 — `pip install tensorrt-cu13==11.1.0.106`.** If no aarch64 wheel exists for that
+- **Gate 1 - `pip install tensorrt-cu13==11.1.0.106`.** If no aarch64 wheel exists for that
   cohort, you learn it in about a minute and the wheel path is closed.
-- **Gate 2 — the TRTMC wheel.** Non-fatal by default: if discovery fails you still get an
+- **Gate 2 - the TRTMC wheel.** Non-fatal by default: if discovery fails you still get an
   image that can answer the TensorRT question, and `install-trtmc` retries inside the
   running container without a rebuild.
 
@@ -164,7 +164,7 @@ TRTMC_REQUIRED=1 ./build.sh                           # make gate 2 fatal again
 ```
 
 > [!TIP]
-> Docker images are immutable — a rebuild creates a new image and moves the tag, orphaning
+> Docker images are immutable - a rebuild creates a new image and moves the tag, orphaning
 > the old one. Before rebuilding, `docker tag trtmc-orin:jp72 trtmc-orin:jp72-prev` keeps a
 > rollback and an A/B baseline instead of a dangling `<none>` image.
 
@@ -176,11 +176,11 @@ TRTMC_REQUIRED=1 ./build.sh                           # make gate 2 fatal again
 
 | Stage | What it proves |
 |---|---|
-| 0 | aarch64, glibc ≥ 2.39, Python 3.12 — the wheel's own requirements |
+| 0 | aarch64, glibc ≥ 2.39, Python 3.12 - the wheel's own requirements |
 | 1 | The nvidia runtime actually injected a driver (device nodes + `libcuda` + `cuDeviceGetCount`) |
 | 1b | `libcudart.so.13` is resolvable by the **dynamic linker**, not just by Python |
 | 2 | `import tensorrt` succeeds |
-| 3 | **The real test** — builds and deserializes fp32/fp16/bf16 engines on this GPU |
+| 3 | **The real test** - builds and deserializes fp32/fp16/bf16 engines on this GPU |
 | 4 | The `trtmc` binary runs, not merely exists on `PATH` |
 
 Stage 3 is the one that matters. A version string proves nothing; an engine that builds and
@@ -216,7 +216,7 @@ trtmc run /work/qwen3-0.6b.bundle --prompt "What is the capital of France? Answe
 Two habits worth forming on this platform:
 
 **Run `inspect` before `run`.** It reports the bundle's declared runtime dependencies,
-which is where a profile expecting FP8 or FP4 hardware announces itself — before it fails
+which is where a profile expecting FP8 or FP4 hardware announces itself - before it fails
 confusingly at execution on a GPU that has neither.
 
 **Stick to bf16 / fp16 / int8.** TRTMC's headline profiles assume Blackwell low-precision
@@ -232,7 +232,7 @@ Measured on Jetson AGX Orin 64GB / JetPack 7.2. Full detail and reproduction ste
 
 | Test | Result | Evidence |
 |---|---|---|
-| `import tensorrt` 11.1.0.106 | works | — |
+| `import tensorrt` 11.1.0.106 | works | - |
 | fp32 engine build + deserialize | works | 12,876 bytes |
 | fp16 engine build + deserialize | works | 9,780 bytes |
 | bf16 engine build + deserialize | works | 9,588 bytes |
@@ -269,10 +269,10 @@ Seven traps, each of which cost real debugging time. Full symptom-indexed detail
 
 | Symptom | Cause |
 |---|---|
-| Build dies when SSH drops | BuildKit cancels on client disconnect — build in `screen` |
+| Build dies when SSH drops | BuildKit cancels on client disconnect - build in `screen` |
 | No matching wheel found | Assets are tagged `py312`, not `cp312`; `trt111` and `trt112` cohorts both exist |
 | `libcuda.so.1: cannot open shared object file` | `NVIDIA_VISIBLE_DEVICES` unset → the nvidia runtime behaves exactly like `runc` |
-| `NVIDIA_VISIBLE_DEVICES=void` inside the container | Not an error — the runtime rewrites it after injecting |
+| `NVIDIA_VISIBLE_DEVICES=void` inside the container | Not an error - the runtime rewrites it after injecting |
 | `trtmc: libcudart.so.13: cannot open shared object file` | Upstream bug: TensorRT depends on a deprecated empty stub package |
 | `AttributeError: … 'platform_has_fast_fp16'` | Removed in TensorRT 11.0 along with weak typing and `IPluginV2` |
 | GPU works but the host feels broken afterwards | Host library bind-mounts are read-write; the runtime writes symlinks into them |
@@ -280,7 +280,7 @@ Seven traps, each of which cost real debugging time. Full symptom-indexed detail
 ## How it stays isolated
 
 The design goal is that running this cannot disturb your JetPack install or any other
-container. See [docs/how-it-works.md](docs/how-it-works.md) for the full accounting —
+container. See [docs/how-it-works.md](docs/how-it-works.md) for the full accounting -
 including what *is* genuinely shared, because "cannot affect anything" would be
 overclaiming.
 
@@ -293,14 +293,14 @@ caches. Removal is `./cleanup.sh`.
 
 Be honest with yourself about whether you need TRTMC specifically:
 
-- **[TensorRT Edge-LLM][edgellm]** — NVIDIA's supported C++ LLM/VLM runtime for embedded,
+- **[TensorRT Edge-LLM][edgellm]** - NVIDIA's supported C++ LLM/VLM runtime for embedded,
   documented for the Orin family on JetPack 7.2. If you want fast local inference rather
   than TRTMC in particular, start here.
-- **JetPack's own TensorRT 10.16** — supported, DLA-capable, already installed. For most
+- **JetPack's own TensorRT 10.16** - supported, DLA-capable, already installed. For most
   Jetson inference work this remains the right answer.
-- **[jetson-containers][jc]** — tested containers for JetPack 6.2 and 7, including Ubuntu
+- **[jetson-containers][jc]** - tested containers for JetPack 6.2 and 7, including Ubuntu
   24.04 CUDA images.
-- **TRTMC from source** — the repo ships `Dockerfile.dev.aarch64` and builds per-SM, which
+- **TRTMC from source** - the repo ships `Dockerfile.dev.aarch64` and builds per-SM, which
   compiles kernels for exactly SM 8.7. More work, closer to NVIDIA's own recipe.
 
 ## Report your results
@@ -314,7 +314,7 @@ The most useful contribution is a data point from hardware that isn't mine. Open
 ```
 
 Particularly wanted: Orin NX / Orin Nano, Thor, JetPack 7.2.1 and later, and anyone who
-gets DLA working — that last one would change a documented limitation into a solved problem.
+gets DLA working - that last one would change a documented limitation into a solved problem.
 
 ## License and credits
 
@@ -325,11 +325,11 @@ NVIDIA, Jetson, Orin, JetPack, CUDA and TensorRT are trademarks of NVIDIA Corpor
 
 Sources and further reading:
 
-- [TensorRT Model Connect][trtmc] — [system requirements][trtmc-req] · [installation][trtmc-install] · [source build][trtmc-src]
-- [TensorRT 11.0 release notes — removed APIs][trt11]
+- [TensorRT Model Connect][trtmc] - [system requirements][trtmc-req] · [installation][trtmc-install] · [source build][trtmc-src]
+- [TensorRT 11.0 release notes - removed APIs][trt11]
 - [TensorRT support matrix][trtmatrix] · [installation guide][trtinstall]
 - [NVIDIA_VISIBLE_DEVICES and driver capabilities][ndv]
-- [NVIDIA/TensorRT#4614 — deprecated `nvidia-cuda-runtime-cu13`][issue4614]
+- [NVIDIA/TensorRT#4614 - deprecated `nvidia-cuda-runtime-cu13`][issue4614]
 - [JetPack SDK downloads and component versions][jetpack]
 
 [trtmc]: https://github.com/NVIDIA/TensorRT-Model-Connect
