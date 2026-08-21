@@ -91,7 +91,7 @@ repository documents the gap between them.
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/tensorrt-model-connect-jetson
+git clone https://github.com/H2024/tensorrt-model-connect-jetson
 cd tensorrt-model-connect-jetson
 chmod +x *.sh
 
