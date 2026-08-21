@@ -1,6 +1,6 @@
 # TensorRT Model Connect on Jetson AGX Orin
 
-Run **TensorRT 11.1** and **[TensorRT Model Connect][trtmc]** on a Jetson AGX Orin under
+Run **TensorRT 11.1** and **[TensorRT Model Connect][trtmc]** on a Jetson AGX Orin 64GB under
 **JetPack 7.2**, in a container that leaves the host JetPack stack completely untouched.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
